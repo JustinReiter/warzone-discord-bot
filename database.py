@@ -1,30 +1,22 @@
-from typing import List
-from _types import RTLPlayerModel, WarzoneGame
-from config import Config
+from tortoise import fields, Model
 
 
-class Database:
+class RTLPlayerModel(Model):
+    warzone_id = fields.IntField(primary_key=True)
+    name = fields.TextField()
+    discord_id = fields.IntField()
+    active = fields.BooleanField(default=False)
+    join_single_game = fields.BooleanField(default=False)
+    wins = fields.IntField()
+    losses = fields.IntField()
+    elo = fields.FloatField()
 
-    def __init__(self, config: Config) -> None:
-        self.config = config
 
-    def get_active_games() -> List[WarzoneGame]:
-        pass
-
-    def get_active_players():
-        pass
-
-    def join_player(player_id) -> bool:
-        pass
-
-    def leave_player(player_id) -> bool:
-        pass
-
-    def add_game() -> bool:
-        pass
-
-    def update_game() -> bool:
-        pass
-
-    def update_player(player: RTLPlayerModel) -> bool:
-        pass
+class RTLGameModel(Model):
+    id = fields.IntField(primary_key=True)
+    created = fields.DatetimeField()
+    ended = fields.DatetimeField(null=True)
+    template = fields.IntField()
+    player_a = fields.ForeignKeyField("models.RTLPlayerModel")
+    player_b = fields.ForeignKeyField("models.RTLPlayerModel")
+    is_winner_a = fields.BooleanField(null=True)

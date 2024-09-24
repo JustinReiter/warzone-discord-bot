@@ -17,7 +17,6 @@ class WarzoneCog(commands.Cog):
         config: Config,
         scheduler: AsyncIOScheduler,
         warzone_api: WarzoneAPI,
-        database: Database,
     ):
         pass
 
@@ -155,14 +154,3 @@ class WarzonePlayer:
 
     def __lt__(self, other: "WarzonePlayer"):
         return self.id < other.id if self.team == other.team else self.team > other.team
-
-
-class RTLPlayerModel:
-
-    def __init__(self) -> None:
-        self.name
-        self.id
-        self.discord_id = None
-        self.wins = 0
-        self.losses = 0
-        self.elo = 1500
