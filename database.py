@@ -7,6 +7,7 @@ class RTLPlayerModel(Model):
     discord_id = fields.IntField()
     active = fields.BooleanField(default=False)
     join_single_game = fields.BooleanField(default=False)
+    in_game = fields.BooleanField(default=False)
     wins = fields.IntField()
     losses = fields.IntField()
     elo = fields.FloatField()

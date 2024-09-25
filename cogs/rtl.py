@@ -5,6 +5,7 @@ from typing import Dict, List, Tuple
 from apscheduler.job import Job
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from apscheduler.triggers.cron import CronTrigger
+import discord
 from discord.ext import commands
 
 from _types import Game, Player, WarzoneCog, WarzonePlayer
@@ -61,6 +62,7 @@ class RTLCommands(WarzoneCog):
             await ctx.send(
                 f"{player.name} (ID: {player.warzone_id}) successfully joined the RTL ladder."
             )
+            await self.notify_active_players()
         else:
             await ctx.send(
                 f"No warzone player found linked to you. Use `\\rtl_link` to get instructions"
@@ -76,6 +78,7 @@ class RTLCommands(WarzoneCog):
             await ctx.send(
                 f"{player.name} (ID: {player.warzone_id}) successfully left the RTL ladder."
             )
+            await self.notify_active_players()
         else:
             await ctx.send(
                 f"No warzone player found linked to you. Use `\\rtl_link` to get instructions"
@@ -124,6 +127,68 @@ class RTLCommands(WarzoneCog):
     ##### RTL engine #####
     ######################
 
+    async def notify_active_players(self):
+        # Called whenever there is a change to active players on the RTL (added/removed)
+        players = await RTLPlayerModel.filter(active=True).order_by("-elo").all()
+
+        embed = discord.Embed(
+            title=f"JR17's real-time ladder - active players",
+        )
+        if len(players) == 0:
+            # no players
+            embed.description = "No active players on the RTL"
+        else:
+            #
+            embed.description = "\n".join(
+                [
+                    f"{'* ' if player.in_game else ''}{player.name}: {player.elo:.0f} ({player.wins}W - {player.losses}L)"
+                    for player in players
+                ]
+                + "\n* denotes player is currently in a game"
+            )
+
+        for channel_id in self.config.rtl_channels:
+            channel = self.bot.get_channel(channel_id)
+            await channel.send(embed=embed)
+
+    async def notify_new_game(self, game: RTLGameModel, template_name: str):
+        player_a: RTLPlayerModel = game.player_a
+        player_b: RTLPlayerModel = game.player_b
+        link = f"https://www.warzone.com/MultiPlayer?GameID={game.id}"
+        embed = discord.Embed(
+            title=f"JR17's real-time ladder - new game",
+            description=f"{player_a.name} vs {player_b.name}\n[game link]({link})",
+        )
+        embed.add_field(
+            name=f"{template_name}"[0:256],
+            value=f"**{player_a.name}** {player_a.elo:.0f}; **{player_b.name}** {player_b.elo:.0f}"[
+                0:1024
+            ],
+        )
+
+        for channel_id in self.config.rtl_channels:
+            channel = self.bot.get_channel(channel_id)
+            await channel.send(embed=embed)
+
+    async def notify_finished_game(self, game: RTLGameModel):
+        winner: RTLPlayerModel = game.player_a if game.is_winner_a else game.player_b
+        loser: RTLPlayerModel = game.player_b if game.is_winner_a else game.player_a
+        link = f"https://www.warzone.com/MultiPlayer?GameID={game.id}"
+        embed = discord.Embed(
+            title=f"{winner.name} defeats {loser.name}",
+            description=link,
+        )
+        embed.add_field(
+            name=f"Elo rating"[0:256],
+            value=f"**{game.player_a.name}** {game.player_a.elo:.0f}; **{game.player_b.name}** {game.player_b.elo:.0f}"[
+                0:1024
+            ],
+        )
+
+        for channel_id in self.config.rtl_channels:
+            channel = self.bot.get_channel(channel_id)
+            await channel.send(embed=embed)
+
     async def update_player_ratings(
         self, winner: RTLPlayerModel, loser: RTLPlayerModel
     ):
@@ -135,7 +200,11 @@ class RTLCommands(WarzoneCog):
         loser.losses += 1
         winner.active = not winner.join_single_game
         loser.active = not loser.join_single_game
+        winner.in_game = False
+        winner.in_game = False
         await asyncio.gather(winner.save(), loser.save())
+        if winner.join_single_game or loser.join_single_game:
+            await self.notify_active_players()
 
     async def update_games(self):
         active_games = (
@@ -169,7 +238,7 @@ class RTLCommands(WarzoneCog):
                 pass
 
     async def create_games(self):
-        active_players = await RTLPlayerModel.filter(active=True).all()
+        active_players = await RTLPlayerModel.filter(active=True, in_game=False).all()
 
         pairs: List[Tuple[RTLPlayerModel, RTLPlayerModel]] = []
         while len(active_players) > 1:
@@ -181,22 +250,23 @@ class RTLCommands(WarzoneCog):
             game_id = self.warzone_api.create_game(
                 [pair[0].warzone_id, pair[1].warzone_id],
                 template_id,
-                "Title",
-                "Description",
+                "JR17's real-time ladder",
+                "This game is a part of JustinR17's real-time ladder. Players have 5 minutes to join the game.",
             )
 
-            await RTLGameModel.create(
+            new_game = await RTLGameModel.create(
                 id=game_id,
                 created=datetime.now(),
                 template=template_id,
                 player_a=pair[0].warzone_id,
                 player_b=pair[1].warzone_id,
             )
+            await self.notify_new_game(new_game, template_name)
 
-        # remove players that were given games
+        # set players as in_game
         for pair in pairs:
-            pair[0].active = False
-            pair[1].active = False
+            pair[0].in_game = True
+            pair[1].in_game = True
             await asyncio.gather(pair[0].save(), pair[1].save())
 
     async def run_engine(self):
