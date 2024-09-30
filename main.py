@@ -1,5 +1,5 @@
 from typing import Any, List
-from tortoise import Tortoise, run_async
+from tortoise import run_async
 
 from _types import WarzoneCog
 from cogs.rtl import RTLCommands
@@ -7,7 +7,7 @@ import discord
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from discord.ext import commands
 from config import Config
-from utils import log_exception, log_message
+from database import init
 from warzone_api import WarzoneAPI
 
 intents = discord.Intents.default()
@@ -31,24 +31,30 @@ class WarzoneBot(commands.Bot):
     def __init__(self, **options: Any) -> None:
         super().__init__(command_prefix="jr!", intents=intents, **options)
         self.config = Config()
+        self.has_loaded_cogs = False
         self.scheduler = AsyncIOScheduler()
         self.warzone_api = WarzoneAPI(self.config)
         self.run(self.config.discord_token)
 
+    @commands.command(name="sync")
+    async def sync(self, ctx):
+        synced = await self.tree.sync()
+        print(f"Synced {len(synced)} command(s).")
+        await ctx.send(f"Synced {len(synced)} command(s).")
+
     async def on_ready(self):
         # Add each individual cog to the bot
         # The __init__ should add jobs if scheduler required
-        for cog in COGS_TO_INITIATLIZE:
-            await self.add_cog(cog(self, self.config, self.scheduler, self.api))
-        self.scheduler.start()
-        synced = await self.tree.sync()
-        print(f"Synced {len(synced)} command(s).")
-
-
-async def init():
-    await Tortoise.init(
-        db_url="sqlite://db.sqlite3", modules={"models": ["app.database"]}
-    )
+        if not self.has_loaded_cogs:
+            # only add cogs once
+            for cog in COGS_TO_INITIATLIZE:
+                await self.add_cog(
+                    cog(self, self.config, self.scheduler, self.warzone_api)
+                )
+            self.scheduler.start()
+            synced = await self.tree.sync()
+            print(f"Synced {len(synced)} command(s).")
+            self.has_loaded_cogs = True
 
 
 run_async(init())

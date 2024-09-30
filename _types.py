@@ -3,10 +3,13 @@ from enum import Enum
 from typing import Dict, List
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from discord.ext import commands
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from warzone_api import WarzoneAPI
+
 
 from config import Config
-from database import Database
-from warzone_api import WarzoneAPI
 
 
 class WarzoneCog(commands.Cog):
@@ -16,7 +19,7 @@ class WarzoneCog(commands.Cog):
         bot: commands.Bot,
         config: Config,
         scheduler: AsyncIOScheduler,
-        warzone_api: WarzoneAPI,
+        warzone_api: "WarzoneAPI",
     ):
         pass
 

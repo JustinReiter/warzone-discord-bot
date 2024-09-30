@@ -1,9 +1,9 @@
 # https://www.warzone.com/wiki/Category:API
 from datetime import datetime, timezone
-from typing import List, Tuple
+from typing import Dict, List, Tuple
 import requests
 
-from _types import TEAM_NAME_TO_API_VALUE, Game, WarzoneGame, WarzonePlayer
+from _types import Game, WarzoneGame, WarzonePlayer
 from config import Config
 from utils import log_message
 
@@ -23,7 +23,7 @@ class WarzoneAPI:
 
     def __init__(self, config: Config):
         self.config = config
-        self.dryrun = "dryrun" in config and config["dryrun"]
+        self.dryrun = False
 
     def check_game(self, game_id: str) -> WarzoneGame:
         """
@@ -90,7 +90,7 @@ class WarzoneAPI:
             "personalMessage": description,
             "players": list(
                 map(
-                    lambda e: {"token": e[0], "team": TEAM_NAME_TO_API_VALUE[e[1]]},
+                    lambda e: {"token": e[0], "team": e[1]},
                     players,
                 )
             ),
@@ -112,7 +112,7 @@ class WarzoneAPI:
                         map(
                             lambda e: {
                                 "token": str(e[0]),
-                                "team": TEAM_NAME_TO_API_VALUE[e[1]],
+                                "team": e[1],
                             },
                             players,
                         )
@@ -176,3 +176,16 @@ class WarzoneAPI:
             )
 
         return True, has_access_to_all_templates, template_access
+
+    def validate_player(self, player_id: str) -> Dict:
+        """
+        Checks if the player has access to the list of templates.
+
+        Returns a tuple containing (True if not blacklisted, True if player has access to all templates, List of booleans on access for each template).
+        """
+        validate_response = requests.post(
+            f"{WarzoneAPI.VALIDATE_INVITE_TOKEN_ENDPOINT}?Token={player_id}",
+            {"Email": self.config.warzone_email, "APIToken": self.config.warzone_token},
+        ).json()
+
+        return validate_response

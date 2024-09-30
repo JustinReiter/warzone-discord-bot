@@ -12,6 +12,8 @@ class Config:
         self.warzone_email: str = config["warzone_email"]
         self.warzone_token: str = config["warzone_token"]
         self.discord_token: str = config["discord_token"]
+        self.flask_secret_key: str = config["FLASK_SECRET_KEY"]
+        self.flask_auth_key: str = config["FLASK_AUTH_KEY"]
 
         self.rtl_channels: List[int] = read_pickled_file("data/rtl_channels.json")
         self.rtl_templates: List[int] = read_pickled_file("data/rtl_templates.json")
