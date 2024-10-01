@@ -68,6 +68,36 @@ class RTLCommands(WarzoneCog):
             ).json()
             for player in players:
                 if player["token"] == token:
+                    # check if player is eligible for RTL based on templates
+                    for offset in range(0, len(RTL_TEMPLATES), 10):
+                        validate_token_response = (
+                            self.warzone_api.validate_player_template_access(
+                                token,
+                                [
+                                    str(template[0])
+                                    for template in RTL_TEMPLATES[offset : offset + 10]
+                                ],
+                            )
+                        )
+                        if not validate_token_response[0]:
+                            # blacklisted
+                            log_message(
+                                f"{interaction.user.name} ({interaction.user.id}) blacklisted clot account with wz account: {player['name']} ({player['id']})",
+                                "RTL.link",
+                            )
+                            return await interaction.response.send_message(
+                                f"Unable to link account as user has blacklisted the CLOT account."
+                            )
+                        elif not validate_token_response[1]:
+                            # has not unlocked all templates
+                            log_message(
+                                f"{interaction.user.name} ({interaction.user.id}) is too low level on wz account: {player['name']} ({player['id']})",
+                                "RTL.link",
+                            )
+                            return await interaction.response.send_message(
+                                f"Unable to link account as user has not unlocked all templates yet. Level XX needed in order to join."
+                            )
+
                     # create new player
                     await RTLPlayerModel.create(
                         warzone_id=player["id"],
@@ -99,6 +129,20 @@ class RTLCommands(WarzoneCog):
             if player and (
                 not player.active or player.join_single_game != join_single_game
             ):
+                validate_blacklist_player = (
+                    self.warzone_api.validate_player_template_access(
+                        str(player.warzone_id), []
+                    )
+                )
+                if validate_blacklist_player[0]:
+                    # player blacklisted the clot
+                    log_message(
+                        f"{interaction.user.name} ({interaction.user.id}) blacklisted the CLOT account: {player.warzone_id=}.",
+                        "RTL.join",
+                    )
+                    return await interaction.response.send_message(
+                        f"[{player.name}](<https://www.warzone.com/Profile?p={player.warzone_id}>) has blacklisted the CLOT account."
+                    )
                 # if player exists AND player is not active or switching b/w single vs multiple games
                 player.active = True
                 player.join_single_game = join_single_game
