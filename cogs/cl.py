@@ -99,7 +99,7 @@ class CLCommands(WarzoneCog):
         for division, clans in standings_output.items():
             embed.add_field(
                 name=division,
-                value=f"```{'Clan':20} | {'TP':3} | {'MP':3} | GR{chr(10)}{f'{chr(10)}'.join([clan.create_embed_string() for clan in clans])}```"[
+                value=f"```{'Clan':20} | {'TP':3} | {'MP':3} | {'%PC':4} | GR{chr(10)}{f'{chr(10)}'.join([clan.create_embed_string() for clan in clans])}```"[
                     0:1024
                 ],
                 inline=False,
@@ -108,7 +108,7 @@ class CLCommands(WarzoneCog):
         embed.timestamp = datetime.now()
         discord_channel = await self.bot.fetch_channel(self.config.cl_standings_channel)
         await discord_channel.send(embed=embed)
-        await interaction.response.defer()
+        await interaction.response.send_message(None)
 
     #####################
     ##### CL engine #####
@@ -150,7 +150,9 @@ class CLCommands(WarzoneCog):
                 if self.name.strip() in SHORT_NAMES
                 else self.name.strip()
             )
-            return f"{name:20} | {self.tp:3g} | {self.mp:3g} | {self.gr:2g}"
+            return (
+                f"{name:20} | {self.tp:3g} | {self.mp:3g} | {self.pc:4} | {self.gr:2g}"
+            )
 
     async def update_cl_standings_embeds(self):
         if CLAN_LEAGUE_SHEET.embed_id is None:
@@ -182,7 +184,7 @@ class CLCommands(WarzoneCog):
         for division, clans in standings_output.items():
             embed.add_field(
                 name=division,
-                value=f"```{'Clan':20} | {'TP':3} | {'MP':3} | GR{chr(10)}{f'{chr(10)}'.join([clan.create_embed_string() for clan in clans])}```"[
+                value=f"```{'Clan':20} | {'TP':3} | {'MP':3} | {'%PC':4} | GR{chr(10)}{f'{chr(10)}'.join([clan.create_embed_string() for clan in clans])}```"[
                     0:1024
                 ],
                 inline=False,
