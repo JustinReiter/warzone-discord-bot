@@ -18,5 +18,7 @@ class Config:
         self.rtl_channels: List[int] = read_pickled_file("data/rtl_channels.json")
         self.rtl_templates: List[int] = read_pickled_file("data/rtl_templates.json")
 
+        self.cl_standings_channel: int = config["cl_standings_channel"]
+
     def save_rtl_channels(self):
         write_pickled_file("data/rtl_channels.json", self.rtl_channels)

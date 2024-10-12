@@ -2,6 +2,7 @@ from typing import Any, List
 from tortoise import run_async
 
 from _types import WarzoneCog
+from cogs.cl import CLCommands
 from cogs.rtl import RTLCommands
 import discord
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
@@ -23,7 +24,7 @@ ROUND_TO_EMBED = {
 }
 
 
-COGS_TO_INITIATLIZE: List[type[WarzoneCog]] = [RTLCommands]
+COGS_TO_INITIATLIZE: List[type[WarzoneCog]] = [CLCommands, RTLCommands]
 
 
 class WarzoneBot(commands.Bot):
