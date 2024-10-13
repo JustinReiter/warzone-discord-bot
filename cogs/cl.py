@@ -78,6 +78,9 @@ class CLCommands(WarzoneCog):
         embed = discord.Embed(
             title=f"{CLAN_LEAGUE_SHEET.name} standings",
         )
+        log_message(
+            f"Creating new CL embed from {interaction.user.name}", "cl.cl_create_embeds"
+        )
 
         standings = self.sheet.get_rows(f"Summary!B4:O{CLAN_LEAGUE_SHEET.end_index}")
         division = None
@@ -99,7 +102,7 @@ class CLCommands(WarzoneCog):
         for division, clans in standings_output.items():
             embed.add_field(
                 name=division,
-                value=f"```{'Clan':20} | {'TP':3} | {'MP':3} | {'%PC':4} | GR{chr(10)}{f'{chr(10)}'.join([clan.create_embed_string() for clan in clans])}```"[
+                value=f"```{'Clan':20} | {'TP':>3} | {'MP':>3} | {'%PC':>4} | GR{chr(10)}{f'{chr(10)}'.join([clan.create_embed_string() for clan in clans])}```"[
                     0:1024
                 ],
                 inline=False,
@@ -155,44 +158,52 @@ class CLCommands(WarzoneCog):
             )
 
     async def update_cl_standings_embeds(self):
-        if CLAN_LEAGUE_SHEET.embed_id is None:
-            # no embed exists yet
-            return
-        discord_channel = self.bot.get_channel(self.config.cl_standings_channel)
-        message = await discord_channel.fetch_message(CLAN_LEAGUE_SHEET.embed_id)
-        embed = message.embeds[0]
-        # embed.description = "Scores are shown as:\n```Team | Pts | MP```"
-        embed.clear_fields()
+        try:
+            if CLAN_LEAGUE_SHEET.embed_id is None:
+                # no embed exists yet
+                return
+            discord_channel = self.bot.get_channel(self.config.cl_standings_channel)
+            message = await discord_channel.fetch_message(CLAN_LEAGUE_SHEET.embed_id)
+            embed = message.embeds[0]
+            # embed.description = "Scores are shown as:\n```Team | Pts | MP```"
+            embed.clear_fields()
 
-        standings = self.sheet.get_rows(f"Summary!B4:O{CLAN_LEAGUE_SHEET.end_index}")
-        division = None
-        standings_output: Dict[str, List[CLCommands.ClanStandings]] = {}
-        for row in standings:
-            row.extend("" for _ in range(14 - len(row)))
-            if not row[0]:
-                division = None
-            elif "Division" in row[0] and "Tournament Winners" not in row[0]:
-                # parse division
-                division = row[0].strip()
-                standings_output[division] = []
-            elif division and row[0] != "Clan":
-                # parse team
-                standings_output[division].append(
-                    CLCommands.ClanStandings(row[0], *row[2:13])
-                )
-
-        for division, clans in standings_output.items():
-            embed.add_field(
-                name=division,
-                value=f"```{'Clan':20} | {'TP':3} | {'MP':3} | {'%PC':4} | GR{chr(10)}{f'{chr(10)}'.join([clan.create_embed_string() for clan in clans])}```"[
-                    0:1024
-                ],
-                inline=False,
+            standings = self.sheet.get_rows(
+                f"Summary!B4:O{CLAN_LEAGUE_SHEET.end_index}"
             )
-        embed.timestamp = datetime.now()
-        await message.edit(embed=embed)
-        log_message(f"Successfully updated the embed for {division}")
+            division = None
+            standings_output: Dict[str, List[CLCommands.ClanStandings]] = {}
+            for row in standings:
+                row.extend("" for _ in range(14 - len(row)))
+                if not row[0]:
+                    division = None
+                elif "Division" in row[0] and "Tournament Winners" not in row[0]:
+                    # parse division
+                    division = row[0].strip()
+                    standings_output[division] = []
+                elif division and row[0] != "Clan":
+                    # parse team
+                    standings_output[division].append(
+                        CLCommands.ClanStandings(row[0], *row[2:13])
+                    )
+
+            for division, clans in standings_output.items():
+                embed.add_field(
+                    name=division,
+                    value=f"```{'Clan':20} | {'TP':>3} | {'MP':>3} | {'%PC':>4} | GR{chr(10)}{f'{chr(10)}'.join([clan.create_embed_string() for clan in clans])}```"[
+                        0:1024
+                    ],
+                    inline=False,
+                )
+            embed.timestamp = datetime.now()
+            await message.edit(embed=embed)
+            log_message(
+                f"Successfully updated the embed for {division}",
+                "cl.update_cl_standings_embeds",
+            )
+        except Exception as e:
+            log_exception(e)
 
     async def run_engine(self):
-        # runs every minute to check in-progress games, then create new games if possible
+        # runs every hour to update the discord CL server standings embed with latest sheet info
         await self.update_cl_standings_embeds()
