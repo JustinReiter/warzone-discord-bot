@@ -7,7 +7,14 @@
 from datetime import datetime
 import secrets
 import string
-from flask import Flask, render_template_string, session, redirect, request, url_for
+from flask import (
+    Flask,
+    render_template,
+    session,
+    redirect,
+    request,
+    url_for,
+)
 from tortoise import run_async
 
 
@@ -34,8 +41,10 @@ async def home():
         return redirect("https://www.warzone.com/CLOT/Auth?p=1277277659&state=join")
     player = await ClotPlayer.filter(warzone_id=session["token"]).first()
     # TODO: return page
-    return render_template_string(
-        f'hello: {player.name}<br><br>You\'re discord token is: {player.discord_token}<br>Message the discord bot with "/rtl_link {player.discord_token}"'
+    return render_template(
+        "home.html",
+        warzone_player=player.name,
+        discord_token=player.discord_token,
     )
 
 
@@ -50,6 +59,7 @@ async def login():
         return redirect(url_for("home"))
 
     player_info = api.validate_player(token)
+    print(player_info)
     if player_info["clotpass"] == clotpass:
         session["token"] = token
         player_exists = await ClotPlayer.filter(warzone_id=token).exists()
@@ -61,6 +71,16 @@ async def login():
                 clan=player_info.get("clan", None),
                 discord_token=generate_discord_token(),
             )
+
+    return redirect(url_for("home"))
+
+
+@app.route("/delete_player")
+async def delete_player():
+    player = await ClotPlayer.filter(warzone_id=session["token"]).first()
+    await player.delete()
+
+    session.pop("token")
 
     return redirect(url_for("home"))
 

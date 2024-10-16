@@ -1,6 +1,6 @@
 from datetime import datetime
 import random
-from typing import Dict, List, Tuple
+from typing import Dict, List
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from apscheduler.triggers.cron import CronTrigger
 import discord
@@ -27,17 +27,16 @@ class CLSheetInfo:
         self.end_index = end_index
 
 
-RTL_TEMPLATES: List[Tuple[int, str]] = [
-    (1540231, "Strategic MME"),
-    (1540232, "Battle Islands V"),
-    (1540234, "French Brawl"),
-    (1540235, "Volcano Island"),
-]
-
+# Only the current CL needs to be updated
 CLAN_LEAGUE_SHEET = CLSheetInfo(
     None, "1ZG0CoSA9RDswzvmYpc3Qtq-NPCtRRiQaXa8_l_jgS1k", "Clan League 17", "108"
 )
+# CLAN_LEAGUE_SHEET = CLSheetInfo(
+#     None, "1-CXBKQ8pDioH2Cu6dKtZlO9qlyReanwGysu27a1D590", "Clan League 18", "84"
+# )
 
+# This is used to shorten clan names shown on the sheet.
+# This allows for easier formatting and reducing the same of the embed.
 SHORT_NAMES = {
     "Union of Soviet Socialist Republics": "USSR",
     "[V.I.W] Very Important Weirdos": "VIW",
@@ -88,6 +87,7 @@ class CLCommands(WarzoneCog):
         for row in standings:
             row.extend("" for _ in range(14 - len(row)))
             if not row[0]:
+                # division end
                 division = None
             elif "Division" in row[0] and "Tournament Winners" not in row[0]:
                 # parse division
@@ -176,6 +176,7 @@ class CLCommands(WarzoneCog):
             for row in standings:
                 row.extend("" for _ in range(14 - len(row)))
                 if not row[0]:
+                    # division end
                     division = None
                 elif "Division" in row[0] and "Tournament Winners" not in row[0]:
                     # parse division
