@@ -1,0 +1,9 @@
+APScheduler==3.10.4
+discord.py==2.4.0
+Flask==3.0.3
+google_api_python_client==2.149.0
+jsonpickle==3.3.0
+protobuf==5.28.2
+python-dotenv==1.0.1
+Requests==2.32.3
+tortoise==0.1.1

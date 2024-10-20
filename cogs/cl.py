@@ -102,7 +102,7 @@ class CLCommands(WarzoneCog):
         for division, clans in standings_output.items():
             embed.add_field(
                 name=division,
-                value=f"```{'Clan':20} | {'TP':>3} | {'MP':>3} | {'%PC':>4} | GR{chr(10)}{f'{chr(10)}'.join([clan.create_embed_string() for clan in clans])}```"[
+                value=f"```{'Clan':20} | {'TP':>3} | {'MP':>3} | {'%PC':>5} | GR{chr(10)}{f'{chr(10)}'.join([clan.create_embed_string() for clan in clans])}```"[
                     0:1024
                 ],
                 inline=False,
@@ -154,7 +154,7 @@ class CLCommands(WarzoneCog):
                 else self.name.strip()
             )
             return (
-                f"{name:20} | {self.tp:3g} | {self.mp:3g} | {self.pc:4} | {self.gr:2g}"
+                f"{name:20} | {self.tp:3g} | {self.mp:3g} | {self.pc:5} | {self.gr:2g}"
             )
 
     async def update_cl_standings_embeds(self):
@@ -191,7 +191,7 @@ class CLCommands(WarzoneCog):
             for division, clans in standings_output.items():
                 embed.add_field(
                     name=division,
-                    value=f"```{'Clan':20} | {'TP':>3} | {'MP':>3} | {'%PC':>4} | GR{chr(10)}{f'{chr(10)}'.join([clan.create_embed_string() for clan in clans])}```"[
+                    value=f"```{'Clan':20} | {'TP':>3} | {'MP':>3} | {'%PC':>5} | GR{chr(10)}{f'{chr(10)}'.join([clan.create_embed_string() for clan in clans])}```"[
                         0:1024
                     ],
                     inline=False,

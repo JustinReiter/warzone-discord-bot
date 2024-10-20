@@ -38,7 +38,7 @@ def generate_discord_token():
 async def home():
     if "token" not in session:
         # work on login flow
-        return redirect("https://www.warzone.com/CLOT/Auth?p=1277277659&state=join")
+        return redirect("https://www.warzone.com/CLOT/Auth?p=88157522499&state=join")
     player = await ClotPlayer.filter(warzone_id=session["token"]).first()
     # TODO: return page
     return render_template(
