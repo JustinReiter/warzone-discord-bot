@@ -3,7 +3,7 @@ from datetime import datetime, timezone
 from typing import Dict, List, Tuple
 import requests
 
-from _types import Game, WarzoneGame, WarzonePlayer
+from _types import FullWarzoneGame, Game, WarzoneGame, WarzonePlayer
 from config import Config
 from utils import log_message
 
@@ -189,3 +189,42 @@ class WarzoneAPI:
         ).json()
 
         return validate_response
+
+    def query_game_full(self, game_id: str) -> FullWarzoneGame | None:
+        """
+        Checks the progress and results of a game using the WZ API.
+
+        Returns the result of the game (in-progress or completed).
+        """
+        game_json = requests.post(
+            f"{WarzoneAPI.QUERY_GAME_ENDPOINT}?GameID={game_id}&getsettings=true",
+            {"Email": self.config.warzone_email, "APIToken": self.config.warzone_token},
+        ).json()
+
+        if "error" in game_json:
+            return None
+
+        players = []
+        for player in game_json["players"]:
+            players.append(
+                WarzonePlayer(
+                    player["name"],
+                    int(player["id"]),
+                    player["state"],
+                    player.get("team", ""),
+                )
+            )
+
+        game = FullWarzoneGame(
+            players,
+            Game.Outcome(game_json["state"]),
+            f"{WarzoneAPI.GAME_URL}{game_json['id']}",
+            datetime.strptime(game_json["created"], "%m/%d/%Y %H:%M:%S").replace(
+                tzinfo=timezone.utc
+            ),
+            int(game_json["numberOfTurns"]),
+            game_json["name"],
+            game_json["settings"]["PersonalMessage"],
+        )
+
+        return game

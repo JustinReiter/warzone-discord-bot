@@ -124,6 +124,37 @@ class WarzoneGame:
         return output_str
 
 
+class FullWarzoneGame:
+
+    def __init__(
+        self,
+        players,
+        outcome=Game.Outcome.UNDEFINED,
+        link="",
+        start_time=datetime.now(),
+        round=0,
+        title="",
+        description="",
+    ) -> None:
+        self.outcome: Game.Outcome = outcome
+        self.winner: List[int] = []
+        self.players: List[WarzonePlayer] = players
+        self.link: str = link
+        self.start_time: datetime = start_time
+        self.round: int = round
+        self.title: str = title
+        self.description: str = description
+
+    def __repr__(self) -> str:
+        output_str = " vs ".join([str(player) for player in sorted(self.players)])
+        output_str += f"\n\tWinner: {self.winner}"
+        output_str += f"\n\tStart time: {self.start_time}"
+        output_str += f"\n\tOutcome: {self.outcome}"
+        output_str += f"\n\tRound: {self.round}"
+        output_str += f"\n\tLink: {self.link}"
+        return output_str
+
+
 class WarzonePlayer:
 
     class Outcome(Enum):

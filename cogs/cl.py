@@ -14,10 +14,6 @@ from utils import log_exception, log_message
 from warzone_api import WarzoneAPI
 
 
-def pop_random(l: List):
-    return l.pop(random.randrange(0, len(l)))
-
-
 class CLSheetInfo:
 
     def __init__(self, embed_id: int, sheet_id: str, name: str, end_index: str):
@@ -28,12 +24,15 @@ class CLSheetInfo:
 
 
 # Only the current CL needs to be updated
-CLAN_LEAGUE_SHEET = CLSheetInfo(
-    None, "1ZG0CoSA9RDswzvmYpc3Qtq-NPCtRRiQaXa8_l_jgS1k", "Clan League 17", "108"
-)
 # CLAN_LEAGUE_SHEET = CLSheetInfo(
-#     None, "1-CXBKQ8pDioH2Cu6dKtZlO9qlyReanwGysu27a1D590", "Clan League 18", "84"
+#     1294769986702803015, "1ZG0CoSA9RDswzvmYpc3Qtq-NPCtRRiQaXa8_l_jgS1k", "Clan League 17", "108"
 # )
+CLAN_LEAGUE_SHEET = CLSheetInfo(
+    1322999770276565023,
+    "1-CXBKQ8pDioH2Cu6dKtZlO9qlyReanwGysu27a1D590",
+    "Clan League 18",
+    "61",
+)
 
 # This is used to shorten clan names shown on the sheet.
 # This allows for easier formatting and reducing the same of the embed.
@@ -60,7 +59,9 @@ class CLCommands(WarzoneCog):
         log_message("Scheduled CLCommands.engine", "bot")
         self.scheduler = scheduler
         self.scheduler.add_job(
-            self.run_engine, CronTrigger(hour="*", minute="0", second="0"), name="RTL"
+            self.run_engine,
+            CronTrigger(hour="*", minute="0", second="0"),
+            name="CL_engine",
         )
 
     #######################
@@ -111,7 +112,7 @@ class CLCommands(WarzoneCog):
         embed.timestamp = datetime.now()
         discord_channel = await self.bot.fetch_channel(self.config.cl_standings_channel)
         await discord_channel.send(embed=embed)
-        await interaction.response.send_message(None)
+        await interaction.response.send_message(ephemeral=True)
 
     #####################
     ##### CL engine #####

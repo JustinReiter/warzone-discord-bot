@@ -86,7 +86,8 @@ class RTLCommands(WarzoneCog):
                                 "RTL.link",
                             )
                             return await interaction.response.send_message(
-                                f"Unable to link account as user has blacklisted the CLOT account."
+                                f"Unable to link account as user has blacklisted the CLOT account.",
+                                ephemeral=True,
                             )
                         elif not validate_token_response[1]:
                             # has not unlocked all templates
@@ -95,7 +96,8 @@ class RTLCommands(WarzoneCog):
                                 "RTL.link",
                             )
                             return await interaction.response.send_message(
-                                f"Unable to link account as user has not unlocked all templates yet. Level XX needed in order to join."
+                                f"Unable to link account as user has not unlocked all templates yet. Level XX needed in order to join.",
+                                ephemeral=True,
                             )
 
                     # create new player
@@ -109,13 +111,18 @@ class RTLCommands(WarzoneCog):
                         "RTL.link",
                     )
                     return await interaction.response.send_message(
-                        f"Successfully created new player linking {interaction.user.name} to {player['name']} on warzone"
+                        f"Successfully created new player linking {interaction.user.name} to {player['name']} on warzone",
+                        ephemeral=True,
                     )
             return await interaction.response.send_message(
-                f"Unable to find player with the associated token"
+                f"Unable to find player with the associated token", ephemeral=True
             )
         except Exception as e:
             log_exception(e)
+            return await interaction.response.send_message(
+                f"Unknown error occurred. Please contact JustinR17 on Discord",
+                ephemeral=True,
+            )
 
     @app_commands.command(
         name="rtl_join",
