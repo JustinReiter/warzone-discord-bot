@@ -170,7 +170,7 @@ elif sys.argv[2] == "parse":
         )
 
     lines_to_output.sort(
-        key=lambda x: (x[0], x[1], x[2], x[6], x[8], x[10], x[12], x[14], x[16])
+        key=lambda x: (x[0], x[1], x[2], x[4], x[6], x[8], x[10], x[12], x[14], x[16])
     )
     with open(f"data/ccs_tabbed_output_{sys.argv[1]}.csv", "w") as f:
         f.write(
