@@ -163,7 +163,7 @@ class CLCommands(WarzoneCog):
             if CLAN_LEAGUE_SHEET.embed_id is None:
                 # no embed exists yet
                 return
-            discord_channel = self.bot.get_channel(self.config.cl_standings_channel)
+            discord_channel = await self.bot.fetch_channel(self.config.cl_standings_channel)
             message = await discord_channel.fetch_message(CLAN_LEAGUE_SHEET.embed_id)
             embed = message.embeds[0]
             # embed.description = "Scores are shown as:\n```Team | Pts | MP```"
@@ -200,7 +200,7 @@ class CLCommands(WarzoneCog):
             embed.timestamp = datetime.now()
             await message.edit(embed=embed)
             log_message(
-                f"Successfully updated the embed for {division}",
+                f"Successfully updated the embed for {CLAN_LEAGUE_SHEET.name}",
                 "cl.update_cl_standings_embeds",
             )
         except Exception as e:
