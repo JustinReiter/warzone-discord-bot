@@ -25,7 +25,11 @@ ROUND_TO_EMBED = {
 }
 
 
-COGS_TO_INITIATLIZE: List[type[WarzoneCog]] = [CLCommands, RTLCommands, UtilCommands]
+COGS_TO_INITIATLIZE: List[type[WarzoneCog]] = [
+    CLCommands,
+    # RTLCommands, # temp disable while WIP
+    UtilCommands,
+]
 
 
 class WarzoneBot(commands.Bot):
