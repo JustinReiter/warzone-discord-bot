@@ -129,12 +129,16 @@ class FullWarzoneGame:
     def __init__(
         self,
         players,
-        outcome=Game.Outcome.UNDEFINED,
-        link="",
-        start_time=datetime.now(),
-        round=0,
-        title="",
-        description="",
+        outcome,
+        link,
+        start_time,
+        round,
+        title,
+        description,
+        template,
+        settings,
+        standings,
+        distributionStanding,
     ) -> None:
         self.outcome: Game.Outcome = outcome
         self.winner: List[int] = []
@@ -144,6 +148,10 @@ class FullWarzoneGame:
         self.round: int = round
         self.title: str = title
         self.description: str = description
+        self.template: str = template
+        self.settings: Dict = settings
+        self.standings: List[List[Dict]] = standings
+        self.distribution_standing: Dict = distributionStanding
 
     def __repr__(self) -> str:
         output_str = " vs ".join([str(player) for player in sorted(self.players)])

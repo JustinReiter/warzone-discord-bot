@@ -7,6 +7,7 @@ from cogs.rtl import RTLCommands
 import discord
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from discord.ext import commands
+from cogs.util import UtilCommands
 from config import Config
 from database import init
 from warzone_api import WarzoneAPI
@@ -24,7 +25,7 @@ ROUND_TO_EMBED = {
 }
 
 
-COGS_TO_INITIATLIZE: List[type[WarzoneCog]] = [CLCommands, RTLCommands]
+COGS_TO_INITIATLIZE: List[type[WarzoneCog]] = [CLCommands, RTLCommands, UtilCommands]
 
 
 class WarzoneBot(commands.Bot):

@@ -60,7 +60,7 @@ class CLCommands(WarzoneCog):
         self.scheduler = scheduler
         self.scheduler.add_job(
             self.run_engine,
-            CronTrigger(hour="*", minute="0", second="0"),
+            CronTrigger(hour="*", minute="25", second="0"),
             name="CL_engine",
         )
 
@@ -163,7 +163,9 @@ class CLCommands(WarzoneCog):
             if CLAN_LEAGUE_SHEET.embed_id is None:
                 # no embed exists yet
                 return
-            discord_channel = await self.bot.fetch_channel(self.config.cl_standings_channel)
+            discord_channel = await self.bot.fetch_channel(
+                self.config.cl_standings_channel
+            )
             message = await discord_channel.fetch_message(CLAN_LEAGUE_SHEET.embed_id)
             embed = message.embeds[0]
             # embed.description = "Scores are shown as:\n```Team | Pts | MP```"

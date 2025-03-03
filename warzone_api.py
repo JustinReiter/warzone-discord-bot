@@ -70,7 +70,11 @@ class WarzoneAPI:
         return game_json["chat"] if "chat" in game_json else []
 
     def create_game(
-        self, players: List[Tuple[str, str]], template: str, name: str, description: str
+        self,
+        players: List[Tuple[str, str]],
+        template: str,
+        name: str,
+        description: str,
     ) -> str:
         """
         Creates a game using the WZ API with the specified players, template, and game name/description.
@@ -117,6 +121,57 @@ class WarzoneAPI:
                             players,
                         )
                     ),
+                },
+            ).json()
+
+        if "error" in game_response:
+            raise WarzoneAPI.GameCreationException(game_response["error"])
+        else:
+            return game_response["gameID"]
+
+    def create_custom_scenario_game(
+        self,
+        players: List[Tuple[str, str]],
+        name: str,
+        description: str,
+        settings: Dict,
+    ) -> str:
+        """
+        Creates a game using the WZ API with the specified players, settings and game name/description.
+
+        Returns the game ID if successfully created, else raises a GameCreationException.
+        """
+
+        # game_response = {
+        #     "gameID": 25876586
+        # }
+
+        settings["AutomaticTerritoryDistribution"] = "Automatic"
+        settings["DistributionMode"] = -3
+        players = [{"token": e[0], "slot": e[1]} for e in players]
+        settings["PersonalMessage"] = description
+        data = {
+            "hostEmail": self.config.warzone_email,
+            "hostAPIToken": self.config.warzone_token,
+            "gameName": name,
+            "personalMessage": description,
+            "players": players,
+            "settings": settings,
+        }
+        if self.dryrun:
+            print("Running dryrun on game creation")
+            game_response = {"gameID": 25876586}
+            print(f"{name}\n{description}\n{data['players']}\n\n")
+        else:
+            game_response = requests.post(
+                WarzoneAPI.CREATE_GAME_ENDPOINT,
+                json={
+                    "hostEmail": self.config.warzone_email,
+                    "hostAPIToken": self.config.warzone_token,
+                    "gameName": name,
+                    "personalMessage": description,
+                    "players": players,
+                    "settings": settings,
                 },
             ).json()
 
@@ -197,7 +252,7 @@ class WarzoneAPI:
         Returns the result of the game (in-progress or completed).
         """
         game_json = requests.post(
-            f"{WarzoneAPI.QUERY_GAME_ENDPOINT}?GameID={game_id}&getsettings=true",
+            f"{WarzoneAPI.QUERY_GAME_ENDPOINT}?GameID={game_id}&getsettings=true&gethistory=true",
             {"Email": self.config.warzone_email, "APIToken": self.config.warzone_token},
         ).json()
 
@@ -215,6 +270,11 @@ class WarzoneAPI:
                 )
             )
 
+        standings = [
+            game_json[f"standing{i}"]
+            for i in range(0, int(game_json["numberOfTurns"]) + 1)
+        ]
+
         game = FullWarzoneGame(
             players,
             Game.Outcome(game_json["state"]),
@@ -225,6 +285,10 @@ class WarzoneAPI:
             int(game_json["numberOfTurns"]),
             game_json["name"],
             game_json["settings"]["PersonalMessage"],
+            game_json.get("templateID", 0),
+            game_json["settings"],
+            standings,
+            game_json.get("distributionStanding", {}),
         )
 
         return game
