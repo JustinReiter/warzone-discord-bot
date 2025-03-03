@@ -82,30 +82,39 @@ class UtilCommands(WarzoneCog):
         players: str,
         without_fog: bool = True,
     ):
-        log_message(
-            f"User: {interaction.user.name} ({interaction.user.id}) in {interaction.guild.name}. Creating custom game from {game_id} at turn {turn_number} with players {players}",
-            "util.util_custom_game",
-        )
-        game = self.warzone_api.query_game_full(game_id)
-        if not (0 <= turn_number <= game.round):
-            await interaction.response.send_message(
-                "Invalid turn number. Must be between 0 and max turn length in game."
+        try:
+            log_message(
+                f"User: {interaction.user.name} ({interaction.user.id}) in {interaction.guild.name}. Creating custom game from {game_id} at turn {turn_number} with players {players}",
+                "util.util_custom_game",
             )
-            return
+            game = self.warzone_api.query_game_full(game_id)
+            if not (0 <= turn_number <= game.round):
+                await interaction.response.send_message(
+                    "Invalid turn number. Must be between 0 and max turn length in game."
+                )
+                return
 
-        if turn_number >= 0:
-            settings = self.create_custom_scenario_settings(game, turn_number)
+            if turn_number >= 0:
+                settings = self.create_custom_scenario_settings(game, turn_number)
 
-        if without_fog:
-            game.settings["Fog"] = "NoFog"
+            if without_fog:
+                game.settings["Fog"] = "NoFog"
 
-        new_game_id = self.warzone_api.create_custom_scenario_game(
-            [[player, f"{i}"] for i, player in enumerate(players.split(","))],
-            "JR17 - Custom Scenario Game",
-            f"This game was created by cloning {game_id} at turn {turn_number}.",
-            settings,
-        )
+            new_game_id = self.warzone_api.create_custom_scenario_game(
+                [[player, f"{i}"] for i, player in enumerate(players.split(","))],
+                "JR17 - Custom Scenario Game",
+                f"This game was created by cloning {game_id} at turn {turn_number}.",
+                settings,
+            )
+            log_message(
+                f"Created custom scenario game: {new_game_id}", "util.util_custom_game"
+            )
 
-        await interaction.response.send_message(
-            f"Game created: <https://www.warzone.com/MultiPlayer?GameID={new_game_id}>"
-        )
+            await interaction.response.send_message(
+                f"Game created: <https://www.warzone.com/MultiPlayer?GameID={new_game_id}>"
+            )
+        except Exception as e:
+            log_exception(e, "util.util_custom_game")
+            await interaction.response.send_message(
+                "An error occurred. Please contact justinr17 on discord or warzone."
+            )
