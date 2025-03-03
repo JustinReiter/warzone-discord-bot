@@ -114,7 +114,7 @@ class UtilCommands(WarzoneCog):
                 f"Game created: <https://www.warzone.com/MultiPlayer?GameID={new_game_id}>"
             )
         except Exception as e:
-            log_exception(e, "util.util_custom_game")
+            log_exception(e)
             await interaction.response.send_message(
                 "An error occurred. Please contact justinr17 on discord or warzone with the time it happened."
             )
