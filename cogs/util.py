@@ -82,6 +82,10 @@ class UtilCommands(WarzoneCog):
         players: str,
         without_fog: bool = True,
     ):
+        log_message(
+            f"User: {interaction.user.name} ({interaction.user.id}) in {interaction.guild.name}. Creating custom game from {game_id} at turn {turn_number} with players {players}",
+            "util.util_custom_game",
+        )
         game = self.warzone_api.query_game_full(game_id)
         if not (0 <= turn_number <= game.round):
             await interaction.response.send_message(
