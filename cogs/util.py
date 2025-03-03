@@ -116,5 +116,5 @@ class UtilCommands(WarzoneCog):
         except Exception as e:
             log_exception(e, "util.util_custom_game")
             await interaction.response.send_message(
-                "An error occurred. Please contact justinr17 on discord or warzone."
+                "An error occurred. Please contact justinr17 on discord or warzone with the time it happened."
             )
