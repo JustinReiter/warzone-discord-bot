@@ -54,7 +54,7 @@ class MTLCommands(WarzoneCog):
 
     def format_discord_embed(self, player_data, game_data):
         embed = discord.Embed(
-            title="[MTL Standings](https://www.warlight-mtl.com/)",
+            title="MTL Standings",
             color=discord.Color.red(),
         )
 
@@ -67,7 +67,9 @@ class MTLCommands(WarzoneCog):
             inline=False,
         )
 
-        game_str = "**Recent games:**\n"
+        game_str = (
+            "[warlight-mtl.com](https://www.warlight-mtl.com/)\n\n**Recent games:**\n"
+        )
         for game in game_data["games"]:
             winner = (
                 game["players"][0]
