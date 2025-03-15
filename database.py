@@ -33,6 +33,13 @@ class ClotPlayer(Model):
     discord_token = fields.TextField()
 
 
+class MTLChannel(Model):
+    id = fields.IntField(primary_key=True)
+    channel_name = fields.TextField()
+    server_id = fields.TextField()
+    message_id = fields.IntField()
+
+
 async def init():
     await Tortoise.init(db_url="sqlite://db.sqlite3", modules={"models": ["database"]})
     # Generate the schema
