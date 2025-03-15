@@ -38,7 +38,7 @@ class MTLCommands(WarzoneCog):
         self.scheduler = scheduler
         self.scheduler.add_job(
             self.run_engine,
-            CronTrigger(hour="*", minute="10", second="0"),
+            CronTrigger(hour="*", minute="40", second="0"),
             name="MTL_engine",
         )
 
@@ -54,7 +54,7 @@ class MTLCommands(WarzoneCog):
 
     def format_discord_embed(self, player_data, game_data):
         embed = discord.Embed(
-            title="MTL Standings",
+            title="[MTL Standings](https://www.warlight-mtl.com/)",
             color=discord.Color.red(),
         )
 
