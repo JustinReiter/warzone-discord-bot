@@ -1,0 +1,1 @@
+@reboot /home/pi/Desktop/warzone-discord-bot/wdb-startup.sh
