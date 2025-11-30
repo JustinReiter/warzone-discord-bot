@@ -47,10 +47,10 @@ class MTLCommands(WarzoneCog):
     #######################
 
     def get_mtl_player_data(self):
-        return requests.get(f"{MTL_API_LINK}", verify=False).json()
+        return requests.get(f"{MTL_API_LINK}", verify=False, timeout=120).json()
 
     def get_mtl_game_data(self):
-        return requests.get(f"{MTL_GAME_API_LINK}", verify=False).json()
+        return requests.get(f"{MTL_GAME_API_LINK}", verify=False, timeout=120).json()
 
     def format_discord_embed(self, player_data, game_data):
         embed = discord.Embed(

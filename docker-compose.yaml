@@ -4,3 +4,5 @@ services:
     volumes:
       - ./:/app
     restart: always
+    stdin_open: true
+    tty: true
