@@ -28,9 +28,9 @@ class CLSheetInfo:
 #     1294769986702803015, "1ZG0CoSA9RDswzvmYpc3Qtq-NPCtRRiQaXa8_l_jgS1k", "Clan League 17", "108"
 # )
 CLAN_LEAGUE_SHEET = CLSheetInfo(
-    1322999770276565023,
-    "1-CXBKQ8pDioH2Cu6dKtZlO9qlyReanwGysu27a1D590",
-    "Clan League 18",
+    1467589896800833537,
+    "1nInD9ybrpFq7cdzHBCML6hmqc5ujOwNJlUMshnI7HkU",
+    "Clan League 19",
     "61",
 )
 
