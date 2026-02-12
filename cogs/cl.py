@@ -60,7 +60,7 @@ class CLCommands(WarzoneCog):
         self.scheduler = scheduler
         self.scheduler.add_job(
             self.run_engine,
-            CronTrigger(hour="*", minute="25", second="0"),
+            CronTrigger.from_crontab("20,50 * * * *"),
             name="CL_engine",
         )
 

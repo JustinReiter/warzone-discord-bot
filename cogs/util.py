@@ -66,6 +66,14 @@ class UtilCommands(WarzoneCog):
     #########################
 
     @app_commands.command(
+        name="ping",
+        description="Ping the bot to see if it's responsive.",
+    )
+    @commands.is_owner()
+    async def ping(self, interaction: discord.Interaction):
+        await interaction.response.send_message("Pong!")
+
+    @app_commands.command(
         name="util_custom_game",
         description="Creates custom scenario of game. Only Justin can use this command.",
     )

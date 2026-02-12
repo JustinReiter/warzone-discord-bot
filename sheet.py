@@ -3,11 +3,13 @@ from __future__ import print_function
 from enum import Enum
 import os.path
 import re
+from time import sleep
 from typing import List
 
 from google.oauth2.service_account import Credentials
 from googleapiclient.discovery import build, Resource
 from googleapiclient.errors import HttpError
+from utils import log_exception, log_message
 
 SCOPES = ["https://www.googleapis.com/auth/spreadsheets"]
 
@@ -55,14 +57,20 @@ class GoogleSheet:
             print(err)
 
     def get_rows(self, range) -> List[List[str]]:
-        try:
-            return (
-                self.sheet.values()  # type: ignore
-                .get(spreadsheetId=self.spreadsheet_id, range=range)
-                .execute()["values"]
-            )
-        except:
-            return []
+        iterations = 0
+        while iterations < 7:
+            try:
+                return (
+                    self.sheet.values()  # type: ignore
+                    .get(spreadsheetId=self.spreadsheet_id, range=range)
+                    .execute()["values"]
+                )
+            except Exception as err:
+                log_message(f"Error getting rows for range {range} after {iterations} attempts: {err}", "GoogleSheet.get_rows")
+                log_exception(err)
+            sleep(2 ** iterations)
+            iterations += 1
+        return []
 
     def get_rows_formulas(self, range) -> List[List[str]]:
         try:
